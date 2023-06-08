@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parabox.CSG.Demo", "Parabox.CSG.Demo.csproj", "{EB05027A-52F6-42F5-349C-24A178035548}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.ProBuilder.Csg", "Unity.ProBuilder.Csg.csproj", "{A9ACB5C9-B868-B777-3296-EF32E9E60875}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{C966E9DA-9F39-333F-F8B5-62E2CAA7EC88}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EB05027A-52F6-42F5-349C-24A178035548}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB05027A-52F6-42F5-349C-24A178035548}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB05027A-52F6-42F5-349C-24A178035548}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB05027A-52F6-42F5-349C-24A178035548}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9ACB5C9-B868-B777-3296-EF32E9E60875}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9ACB5C9-B868-B777-3296-EF32E9E60875}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9ACB5C9-B868-B777-3296-EF32E9E60875}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9ACB5C9-B868-B777-3296-EF32E9E60875}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C966E9DA-9F39-333F-F8B5-62E2CAA7EC88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C966E9DA-9F39-333F-F8B5-62E2CAA7EC88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C966E9DA-9F39-333F-F8B5-62E2CAA7EC88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C966E9DA-9F39-333F-F8B5-62E2CAA7EC88}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
