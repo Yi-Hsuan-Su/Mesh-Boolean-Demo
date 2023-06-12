@@ -17,8 +17,8 @@ public class Meshcontroller : MonoBehaviour
     public Vector3 origpos;
 
     public List<GameObject> objlist;
-
-
+    public bool isexecute;
+    
     private void Start()
     {
         isselected = false;
@@ -31,19 +31,46 @@ public class Meshcontroller : MonoBehaviour
         origpos = this.transform.position;
 
         objlist = new List<GameObject>();
+        isexecute = true;
 
     }
 
     private void Update()
     {
 
-            if (isenter)
+
+        if ( ( isexecute || this.GetComponent<Axiscontroller>().ismoved) && isenter && objlist.Count != 0   )
             {
                 ComputeSubstract(m_other, objlist);
-            Resources.UnloadUnusedAssets();
-            System.GC.Collect();
+                Resources.UnloadUnusedAssets();
+                System.GC.Collect();
+             }
+
+        for (int i = 0; i < objlist.Count; i++)
+        {
+            if (objlist[i].GetComponent<Axiscontroller>().ismoved)
+            {
+                isexecute = true;
+                break;
+            }
+            else
+            {
+                isexecute = false;
+            }
         }
-        
+
+        if (this.gameObject.GetComponent<Highlight>().ishighlight)
+        {
+            if(GameObject.Find(this.name+"new"))
+                GameObject.Find(this.name+"new").GetComponent<Outline>().enabled = true;
+        }
+        else
+        {
+            if(GameObject.Find(this.name+"new"))
+                GameObject.Find(this.name + "new").GetComponent<Outline>().enabled = false;
+        }
+
+
     }
 
     private void OnTriggerEnter(Collider other)
@@ -67,6 +94,8 @@ public class Meshcontroller : MonoBehaviour
     {
         if(objlist.Count >0)
              isenter = true;
+
+   
     }
 
 
@@ -82,10 +111,11 @@ public class Meshcontroller : MonoBehaviour
         
         if (objlist.Count ==0  )
         {
+            /*
             if (!other.gameObject.CompareTag("Object")) 
             {    
                 this.gameObject.GetComponent<Outline>().enabled = true;
-            }
+            }*/
             if (GameObject.Find(this.name + "new"))
             {
                 Object.Destroy(GameObject.Find(this.name + "new"));
@@ -150,11 +180,12 @@ public class Meshcontroller : MonoBehaviour
 
         newobj.GetComponent<MeshRenderer>().materials = newmat.ToArray();
 
+
         if (this.gameObject.GetComponent<Highlight>().ishighlight)
         {
             newobj.AddComponent<Outline>().enabled = true;
         }
-        else 
+        else
         {
             newobj.AddComponent<Outline>().enabled = false;
         }

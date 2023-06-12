@@ -694,34 +694,30 @@ var UnityLoader = UnityLoader || {
     }
 
     var osVersion = unknown;
-    try {
-      if (/Windows/.test(os)) {
-        osVersion = /Windows (.*)/.exec(os)[1];
-        os = "Windows";
-      }
-      switch (os) {
-      case "Mac OS X":
-        osVersion = /Mac OS X ([\.\_\d]+)/.exec(nAgt)[1];
-        break;
-      case "Android":
-        osVersion = /Android ([\.\_\d]+)/.exec(nAgt)[1];
-        break;
-      case "iOS":
-        osVersion = /OS (\d+)_(\d+)_?(\d+)?/.exec(nVer);
-        osVersion = osVersion[1] + "." + osVersion[2] + "." + (osVersion[3] | 0);
-        break;
-      }
-    } catch(e) {
-      // Gracefully ignore errors
+    if (/Windows/.test(os)) {
+      osVersion = /Windows (.*)/.exec(os)[1];
+      os = "Windows";
+    }
+    switch (os) {
+    case "Mac OS X":
+      osVersion = /Mac OS X (10[\.\_\d]+)/.exec(nAgt)[1];
+      break;
+    case "Android":
+      osVersion = /Android ([\.\_\d]+)/.exec(nAgt)[1];
+      break;
+    case "iOS":
+      osVersion = /OS (\d+)_(\d+)_?(\d+)?/.exec(nVer);
+      osVersion = osVersion[1] + "." + osVersion[2] + "." + (osVersion[3] | 0);
+      break;
     }
     return {
       width: screen.width ? screen.width : 0,
       height: screen.height ? screen.height : 0,
-      browser: browser || 'Unknown browser',
-      browserVersion: version || 'Unknown version',
+      browser: browser,
+      browserVersion: version,
       mobile: mobile,
-      os: os || 'Unknown OS',
-      osVersion: osVersion || 'Unknown OS Version',
+      os: os,
+      osVersion: osVersion,
       gpu: (function() {
         var canvas = document.createElement("canvas");
         var gl = canvas.getContext("experimental-webgl");
@@ -958,16 +954,14 @@ var UnityLoader = UnityLoader || {
   },
   scheduleBuildDownloadJob: function (Module, jobId, urlId) {
     UnityLoader.Progress.update(Module, jobId);
-    var url = Module.resolveBuildUrl(Module[urlId]);
-    var cacheControl = typeof Module.cacheControl == "function" ? Module.cacheControl(url) : Module.cacheControl ? Module.cacheControl[urlId] || Module.cacheControl["default"] : "no-cache";
     UnityLoader.Job.schedule(Module, jobId, [], UnityLoader.downloadJob, {
-      url: url,
+      url: Module.resolveBuildUrl(Module[urlId]),
       onprogress: function(e) { UnityLoader.Progress.update(Module, jobId, e); },
       onload: function(e) { UnityLoader.Progress.update(Module, jobId, e); },
-      objParameters: Module.companyName && Module.productName && cacheControl && cacheControl != "no-cache" ? {
+      objParameters: Module.companyName && Module.productName && Module.cacheControl && (Module.cacheControl[urlId] || Module.cacheControl["default"]) ? {
         companyName: Module.companyName,
         productName: Module.productName,
-        cacheControl: cacheControl,
+        cacheControl: Module.cacheControl[urlId] || Module.cacheControl["default"],
       } : null,
     });
     
@@ -1117,34 +1111,6 @@ var UnityLoader = UnityLoader || {
       resolveURL.link.href = url;
       return resolveURL.link.href;
     }
-
-    // Safari does not automatically stretch the fullscreen element to fill the screen.
-    // The CSS width/height of the canvas causes it to remain the same size in the full screen
-    // window on Safari, resulting in it being a small canvas with black borders filling the
-    // rest of the screen.
-    var _savedElementWidth = "";
-    var _savedElementHeight = "";
-    // Safari uses webkitfullscreenchange event and not fullscreenchange
-    document.addEventListener("webkitfullscreenchange", function(e) {
-      var canvas = unityInstance.Module.canvas;
-      // Safari uses webkitCurrentFullScreenElement and not fullscreenElement.
-      var fullscreenElement = document.webkitCurrentFullScreenElement;
-      if (fullscreenElement === canvas) {
-        if (canvas.style.width) {
-          _savedElementWidth = canvas.style.width;
-          _savedElementHeight = canvas.style.height;
-          canvas.style.width = "100%";
-          canvas.style.height = "100%";
-        }
-      } else {
-        if (_savedElementWidth) {
-          canvas.style.width = _savedElementWidth;
-          canvas.style.height = _savedElementHeight;
-          _savedElementWidth = "";
-          _savedElementHeight = "";
-        }
-      }
-    });
 
     var unityInstance = {
       url: url,
@@ -1350,25 +1316,12 @@ var UnityLoader = UnityLoader || {
           openRequest.onsuccess = function (e) { initDatabase(e.target.result); };
           openRequest.onerror = function () { initDatabase(null); };
         }
-
-        // Workaround for WebKit bug 226547:
-        // On very first page load opening a connection to IndexedDB hangs without triggering onerror.
-        // Add a timeout that triggers the error handling code.
-        var indexedDBTimeout = setTimeout(function () {
-          if (typeof cache.database != "undefined")
-            return;
-          
-          initDatabase(null);  
-        }, 2000);
-
         var openRequest = indexedDB.open(UnityCacheDatabase.name);
         openRequest.onupgradeneeded = function (e) {
           var objectStore = e.target.result.createObjectStore(XMLHttpRequestStore.name, { keyPath: "url" });
           ["version", "company", "product", "updated", "revalidated", "accessed"].forEach(function (index) { objectStore.createIndex(index, index); });
         };
         openRequest.onsuccess = function (e) {
-          clearTimeout(indexedDBTimeout);
-
           var database = e.target.result;
           if (database.version < UnityCacheDatabase.version) {
             database.close();
@@ -1377,12 +1330,8 @@ var UnityLoader = UnityLoader || {
             initDatabase(database);
           }
         };
-        openRequest.onerror = function () {
-          clearTimeout(indexedDBTimeout);
-          initDatabase(null);
-        };
+        openRequest.onerror = function () { initDatabase(null); };
       } catch (e) {
-        clearTimeout(indexedDBTimeout);
         initDatabase(null);
       }
     };
@@ -1438,9 +1387,7 @@ var UnityLoader = UnityLoader || {
           cache.revalidated = true;
           unityCache.execute(XMLHttpRequestStore.name, "put", [cache.result]);
           log("'" + cache.result.url + "' successfully revalidated and served from the indexedDB cache");
-        } else if (xhr.status != 200) {
-          log("'" + cache.result.url + "' request failed with status: " + xhr.status + " " + xhr.statusText);
-        } else if (xhr.getResponseHeader("Last-Modified") || xhr.getResponseHeader("ETag")) {
+        } else if (xhr.status == 200) {
           cache.result = createXMLHttpRequestResult(cache.result.url, cache.company, cache.product, cache.result.accessed, xhr);
           cache.revalidated = true;
           unityCache.execute(XMLHttpRequestStore.name, "put", [cache.result], function (result) {
@@ -1448,6 +1395,8 @@ var UnityLoader = UnityLoader || {
           }, function (error) {
             log("'" + cache.result.url + "' successfully downloaded but not stored in the indexedDB cache due to the error: " + error);
           });
+        } else {
+          log("'" + cache.result.url + "' request failed with status: " + xhr.status + " " + xhr.statusText);
         }
       }.bind(this));
     };

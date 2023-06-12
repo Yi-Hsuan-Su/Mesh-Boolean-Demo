@@ -35,7 +35,7 @@ public class Axiscontroller : MonoBehaviour
         
         Axis_initialize();
        Axis_disable();
-        ismoved = false;
+        ismoved = true;
         lastpos = transform.position;
     }
 

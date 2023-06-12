@@ -34,10 +34,10 @@ public class Objectselector : MonoBehaviour
             Ray ray = m_cam.ScreenPointToRay(pos);
             RaycastHit hit;
             Physics.Raycast(m_cam.transform.position, ray.direction, out hit, 10000.0f);
-            Debug.DrawLine(m_cam.transform.position, ray.direction);
+            ///Debug.DrawLine(m_cam.transform.position, ray.direction);
             if (hit.collider)
             {
-                Debug.LogError(hit.collider.transform.name);
+                Debug.Log(hit.collider.transform.name);
                 if (!obj_lock || hit.collider.gameObject.CompareTag("Arrowx") || hit.collider.gameObject.CompareTag("Arrowy") || hit.collider.gameObject.CompareTag("Arrowz") || hit.collider.gameObject.CompareTag("center"))
                 {
                     selectedGameobject = hit.collider.gameObject;
@@ -56,6 +56,11 @@ public class Objectselector : MonoBehaviour
                     cur_obj = selectedGameobject;
                     // selectedGameobject.GetComponent<Meshcontroller>().isselected = true;
 
+
+                    selectedGameobject.GetComponent<Highlight>().ishighlight = true;
+                    m_highlight = selectedGameobject.GetComponent<Highlight>();
+                    m_highlight.m_outline.enabled = true;
+                    /*
                     if (selectedGameobject.GetComponent<MeshRenderer>().enabled == true)
                     {
                         m_highlight = selectedGameobject.GetComponent<Highlight>();
@@ -64,7 +69,9 @@ public class Objectselector : MonoBehaviour
                     else 
                     {
                         selectedGameobject.GetComponent<Highlight>().ishighlight = true;
-                    }
+                        m_highlight = selectedGameobject.GetComponent<Highlight>();
+                        m_highlight.m_outline.enabled = true;
+                    }*/
 
                     selectedGameobject.GetComponent<Axiscontroller>().Axis_enable();
                   obj_lock = true;
@@ -125,7 +132,7 @@ public class Objectselector : MonoBehaviour
         {
             if (selectedGameobject.CompareTag("Arrowx"))
             {
-                Debug.Log(cur_obj.transform.name);
+               
                 Vector3 temp = new Vector3(cur_obj.transform.position.x - Input.GetAxis("Mouse X") * xSpeed * 0.01f, cur_obj.transform.position.y, cur_obj.transform.position.z);
                 cur_obj.transform.position = temp;
 

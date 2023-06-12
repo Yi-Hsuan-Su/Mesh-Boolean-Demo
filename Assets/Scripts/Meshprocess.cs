@@ -32,25 +32,29 @@ public class Meshprocess : MonoBehaviour
         }
         else if (objlist.Count > 1)
         {
+ 
+
+        
+ 
+                result = CSG.Subtract(orig, objlist[0]);
 
 
-
-            result = CSG.Subtract(orig, objlist[0]) ;
-            GameObject tmp  = new GameObject();;
 
             for (int i = 1; i < objlist.Count; i++)
             {
 
-                tmp.transform.name = orig.name + "tmp";
-               tmp.AddComponent<MeshFilter>().mesh = result.mesh;
-                tmp.AddComponent<MeshRenderer>().materials = result.materials.ToArray();
-                Destroy(result.mesh);
-                
-               result = CSG.Subtract(tmp, objlist[i]);
-               Destroy(tmp.GetComponent<MeshFilter>());
-                Destroy(tmp.GetComponent<MeshRenderer>());
-                Object.Destroy(tmp);
-                System.GC.Collect();
+                        GameObject tmp = new GameObject();
+                        tmp.transform.name = orig.name + "tmp";
+                        tmp.AddComponent<MeshFilter>().mesh = result.mesh;
+                        tmp.AddComponent<MeshRenderer>().materials = result.materials.ToArray();
+                        Destroy(result.mesh);
+
+                        result = CSG.Subtract(tmp, objlist[i]);
+                        Destroy(tmp.GetComponent<MeshFilter>());
+                        Destroy(tmp.GetComponent<MeshRenderer>());
+                        Object.Destroy(tmp);
+                        System.GC.Collect();
+                    
             }
 
 
